@@ -1,7 +1,9 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
+model_path = os.path.join(os.curdir, "model","linear")
 
 tranX = np.linspace(-1, 1, 100)
 tranY = 2 * tranX + np.random.randn(*tranX.shape) * 0.3
@@ -9,12 +11,17 @@ tranY = 2 * tranX + np.random.randn(*tranX.shape) * 0.3
 X = tf.convert_to_tensor(tranX, dtype=tf.float32)
 Y = tf.convert_to_tensor(tranY, dtype=tf.float32)
 
-W = tf.Variable(tf.random.normal([1]), name="weight")
-b = tf.Variable(tf.zeros([1]), name="bias")
+class linear_model(tf.Module):
+    def __init__(self, name=None):
+        super().__init__(name)
+        self.W = tf.Variable(tf.random.normal([1]), name="weight")
+        self.b = tf.Variable(tf.zeros([1]), name="bias")
+    
+    @tf.function
+    def __call__(self, x):
+        return tf.multiply(x,self.W) + self.b
 
-def linear_mode(x):
-    z = tf.multiply(x,W) + b
-    return z
+linear_mode = linear_model()
 
 def loss_compute(expect, predication):
     loss = tf.reduce_mean(tf.square(expect - predication))
@@ -37,20 +44,23 @@ for epoch in range(epochs):
     with tf.GradientTape() as tape:
         predict = linear_mode(X)
         loss = loss_compute(Y, predict)
-        gradients = tape.gradient(loss, [W,b])
-        optimizer.apply_gradients(zip(gradients,[W, b]))
+        gradients = tape.gradient(loss, [linear_mode.W,linear_mode.b])
+        optimizer.apply_gradients(zip(gradients,[linear_mode.W, linear_mode.b]))
         loss_history.append(loss.numpy())
-        weight_history.append(W.numpy()[0])
-        bias_history.append(b.numpy()[0])
+        weight_history.append(linear_mode.W.numpy()[0])
+        bias_history.append(linear_mode.b.numpy()[0])
         platdata["batchsize"].append(epoch)
         platdata["loss"].append(loss)
 
     if epoch % display_step == 0:
-        print(f'Epoch {epoch}, loss : {loss.numpy()}, w= {W.numpy()}, b = {b.numpy()}')
+        print(f'Epoch {epoch}, loss : {loss.numpy()}, w= {linear_mode.W.numpy()}, b = {linear_mode.b.numpy()}')
+
+
+tf.saved_model.save(linear_mode, model_path, signatures=linear_mode.__call__.get_concrete_function(tf.TensorSpec(shape=[], dtype=tf.float32)))
 
 print("*" * 50)
 print("finished")
-print(f"final weight: {W.numpy()} (theory: 2.0), final bias: {b.numpy()}, (theory: 0.0)")
+print(f"final weight: {linear_mode.W.numpy()} (theory: 2.0), final bias: {linear_mode.b.numpy()}, (theory: 0.0)")
 
 def make_predictions(val):
     x_tensor = tf.convert_to_tensor(val, dtype=tf.float32)
@@ -78,7 +88,7 @@ def show_data():
     predict_y = make_predictions(x)
 
     ax1.plot(tranX, tranY, "ro", label="train Data")
-    ax1.plot(x, predict_y, "b-", linewidth=2, label=f"train line(y={W.numpy()[0]}x + {b.numpy()[0]})")
+    ax1.plot(x, predict_y, "b-", linewidth=2, label=f"train line(y={linear_mode.W.numpy()[0]}x + {linear_mode.b.numpy()[0]})")
     ax1.plot(x, expect_y, "g--", linewidth=2, label="theory line(y=2x)")
     ax1.set_xlabel("X")
     ax1.set_ylabel("Y")
