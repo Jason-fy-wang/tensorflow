@@ -209,3 +209,4 @@ __marimo__/
 model
 **/models
 **/data
+.env
