@@ -15,10 +15,10 @@
     }
   },
   "features": {
-  "ghcr.io/devcontainers/features/python:1": {
-    "version": "3.10",
-    "installJupyterlab": true,
-    "toolsToInstall": "python-dotenv, requests,beautifulsoup4"
-  }
+  // "ghcr.io/devcontainers/features/python:1": {
+  //   "version": "3.10",
+  //   "installJupyterlab": true,
+  //   "toolsToInstall": "python-dotenv, requests,beautifulsoup4"
+  // }
  }
 }
