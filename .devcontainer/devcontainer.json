@@ -1,6 +1,11 @@
 {
  "name": "python 3.10",
- "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+ "image": "python:3.10.19-bookworm",
+ "hostRequirements": {
+   "cpus": 8,
+   "memory": "16gb",
+   "storage": "32gb"
+ },
  "customizations": {
     "vscode": {
       "extensions": [
