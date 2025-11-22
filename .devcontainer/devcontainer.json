@@ -1,6 +1,6 @@
 {
  "name": "python 3.10",
- "image": "python:3.10.19-bookworm",
+ "image": "mcr.microsoft.com/devcontainers/python:3.10-bookworm",
  "hostRequirements": {
    "cpus": 4,
    "memory": "16gb",
